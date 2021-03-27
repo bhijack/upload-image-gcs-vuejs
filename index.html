@@ -13,6 +13,7 @@
         #app {
             margin: 2rem;
         }
+
         #preview-image {
             height: 500px;
             margin-bottom: 2rem;
@@ -21,22 +22,30 @@
         #preview-image img {
             height: 100%;
         }
+
         .button-upload {
             margin-top: 2rem;
         }
 
-        .button-upload button:first-child{
+        .button-upload button:first-child {
             margin-right: 1rem;
+        }
+
+        #image-error {
+            margin-bottom: 2rem;
         }
     </style>
 </head>
 
 <body>
     <div class="container" id="app">
-       
+        <div id="image-error" class="is-flex is-justify-content-center" v-if="isImageLarge">
+            <p>Image too large. (Limit size: 3MB)</p>
+        </div>
         <div id="preview-image" v-if="preview" class="is-flex is-justify-content-center">
             <img :src="preview" alt="">
         </div>
+
 
         <div class="is-flex is-justify-content-center">
             <b-field class="file is-primary" :class="{'has-name': !!file}">
@@ -57,10 +66,10 @@
             </b-field>
             <b-field>
                 <b-button v-if="file" type="is-success" @click="uploadImage()">Upload</b-button>
-                <b-button v-else type="is-success" disabled >Upload</b-button>
+                <b-button v-else type="is-success" disabled>Upload</b-button>
             </b-field>
 
-        </div>    
+        </div>
 
     </div>
 

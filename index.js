@@ -3,11 +3,22 @@ var app = new Vue({
     data: {
         file: null,
         dropFiles: [],
-        preview: null
+        preview: null,
+        isImageLarge: false
     },
     methods: {
         previewUpload() {
-            this.preview = URL.createObjectURL(this.file)
+            this.isImageSizeExceeded()
+            if(!this.isImageLarge){
+                this.preview = URL.createObjectURL(this.file)
+            }else{
+                this.preview = null
+                this.file = null
+            }
+        },
+        isImageSizeExceeded() {
+            var filesize = ((this.file.size/1000)/1000); //MB - use 1000 instead 1024
+            this.isImageLarge = filesize > 3
         },
         clearBrowseImage() {
             this.file = null

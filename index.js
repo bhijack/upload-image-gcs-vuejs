@@ -7,6 +7,7 @@ var app = new Vue({
         isImageLarge: false,
         isImageUploaded: false,
         isUploadImageError: false,
+        isLoading: false,
     },
     methods: {
         previewUpload() {
@@ -30,6 +31,7 @@ var app = new Vue({
             this.preview = null
         },
         async uploadImage() {
+            this.isLoading = true
             if (this.file) {
                 let uploadSignedURL = await axios.post('http://localhost:3000/signed-url/upload', {
                     filePath: this.file.name,
@@ -62,29 +64,8 @@ var app = new Vue({
                     }
 
                 }
-
-
-
-
-
-
-                // const xhr = new XMLHttpRequest();
-                // xhr.open("PUT", url, true);
-                // xhr.onload = () => {
-                //     const status = xhr.status;
-                //     if (status === 200) {
-                //         alert("File is uploaded");
-                //     } else {
-                //         alert("Something went wrong!");
-                //     }
-                // };
-
-                // xhr.onerror = () => {
-                //     alert("Something went wrong");
-                // };
-                // xhr.setRequestHeader('Content-Type', this.file.type);
-                // xhr.send(this.file);
             }
+            this.isLoading = false
         }
     }
 

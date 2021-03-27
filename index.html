@@ -23,7 +23,7 @@
 <body>
     <div id="app">
         <b-field class="file is-primary" :class="{'has-name': !!file}">
-            <b-upload v-model="file" class="file-label" @input="previewUpload()">
+            <b-upload v-model="file" class="file-label" @input="previewUpload()" accept="image/*">
                 <span class="file-cta">
                     <b-icon class="file-icon" icon="upload"></b-icon>
                     <span class="file-label">Browse image</span>

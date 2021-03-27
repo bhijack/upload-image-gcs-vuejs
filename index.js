@@ -4,20 +4,25 @@ var app = new Vue({
         file: null,
         dropFiles: [],
         preview: null,
-        isImageLarge: false
+        isImageLarge: false,
+        isImageUploaded: false,
+        isUploadImageError: false,
     },
     methods: {
         previewUpload() {
+            this.isImageLarge = false
+            this.isImageUploaded = false
+            this.isUploadImageError = false
             this.isImageSizeExceeded()
-            if(!this.isImageLarge){
+            if (!this.isImageLarge) {
                 this.preview = URL.createObjectURL(this.file)
-            }else{
+            } else {
                 this.preview = null
                 this.file = null
             }
         },
         isImageSizeExceeded() {
-            var filesize = ((this.file.size/1000)/1000); //MB - use 1000 instead 1024
+            var filesize = ((this.file.size / 1000) / 1000); //MB - use 1000 instead 1024
             this.isImageLarge = filesize > 3
         },
         clearBrowseImage() {
@@ -31,16 +36,38 @@ var app = new Vue({
                     fileType: this.file.type
                 }).catch(error => {
                     console.log(error)
+                    this.isUploadImageError = true
+                    this.file = null
+                    this.preview = null
                 })
-                let url = uploadSignedURL.data.url
 
-                let response = await axios.put(url,this.file,{
-                    headers: {
-                        "Content-Type": this.file.type
+                if (uploadSignedURL && 'url' in uploadSignedURL.data) {
+                    let url = uploadSignedURL.data.url
+
+                    let response = await axios.put(url, this.file, {
+                        headers: {
+                            "Content-Type": this.file.type
+                        }
+                    }).catch(error => {
+                        console.log(error)
+                        this.isUploadImageError = true
+                        this.file = null
+                        this.preview = null
+                        return false
+                    })
+                    if (response) {
+                        this.isImageUploaded = true
+                        this.file = null
+                        this.preview = null
                     }
-                }).catch(error => {
-                    console.log(error)
-                })
+
+                }
+
+
+
+
+
+
                 // const xhr = new XMLHttpRequest();
                 // xhr.open("PUT", url, true);
                 // xhr.onload = () => {

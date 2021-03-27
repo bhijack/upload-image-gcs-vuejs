@@ -31,7 +31,7 @@
             margin-right: 1rem;
         }
 
-        #image-error {
+        .image-message {
             margin-bottom: 2rem;
         }
     </style>
@@ -39,9 +39,13 @@
 
 <body>
     <div class="container" id="app">
-        <div id="image-error" class="is-flex is-justify-content-center" v-if="isImageLarge">
-            <p>Image too large. (Limit size: 3MB)</p>
+
+        <div class="image-message is-flex is-justify-content-center" >
+            <p v-if="isImageUploaded">Image uploaded.</p>
+            <p v-if="isImageLarge">Image too large. (Limit size: 3MB)</p>
+            <p v-if="isUploadImageError">Upload image error</p>
         </div>
+
         <div id="preview-image" v-if="preview" class="is-flex is-justify-content-center">
             <img :src="preview" alt="">
         </div>

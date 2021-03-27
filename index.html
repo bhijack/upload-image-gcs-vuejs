@@ -10,59 +10,58 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@5.8.55/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
     <style>
+        #app {
+            margin: 2rem;
+        }
         #preview-image {
             height: 500px;
+            margin-bottom: 2rem;
         }
 
         #preview-image img {
             height: 100%;
         }
+        .button-upload {
+            margin-top: 2rem;
+        }
+
+        .button-upload button:first-child{
+            margin-right: 1rem;
+        }
     </style>
 </head>
 
 <body>
-    <div id="app">
-        <b-field class="file is-primary" :class="{'has-name': !!file}">
-            <b-upload v-model="file" class="file-label" @input="previewUpload()" accept="image/*">
-                <span class="file-cta">
-                    <b-icon class="file-icon" icon="upload"></b-icon>
-                    <span class="file-label">Browse image</span>
-                </span>
-                <span class="file-name" v-if="file">
-                    {{ file.name }}
-                </span>
-            </b-upload>
-        </b-field>
-        <div id="preview-image" v-if="preview">
+    <div class="container" id="app">
+       
+        <div id="preview-image" v-if="preview" class="is-flex is-justify-content-center">
             <img :src="preview" alt="">
         </div>
-        <b-field>
-            <b-button @click="clearBrowseImage()">Cancel</b-button>
-        </b-field>
-        <b-field>
-            <b-button @click="uploadImage()">Upload</b-button>
-        </b-field>
-        <!-- <b-field>
-            <b-upload v-model="dropFiles" multiple drag-drop>
-                <section class="section">
-                    <div class="content has-text-centered">
-                        <p>
-                            <b-icon icon="upload" size="is-large">
-                            </b-icon>
-                        </p>
-                        <p>Drop your files here or click to upload</p>
-                    </div>
-                </section>
 
-            </b-upload>
-        </b-field>
-        <div class="tags">
-            <span v-for="(file, index) in dropFiles" :key="index" class="tag is-primary">
-                {{file.name}}
-                <button class="delete is-small" type="button" @click="deleteDropFile(index)">
-                </button>
-            </span>
-        </div> -->
+        <div class="is-flex is-justify-content-center">
+            <b-field class="file is-primary" :class="{'has-name': !!file}">
+                <b-upload v-model="file" class="file-label" @input="previewUpload()" accept="image/*">
+                    <span class="file-cta">
+                        <b-icon class="file-icon" icon="upload"></b-icon>
+                        <span class="file-label">Browse image</span>
+                    </span>
+                    <span class="file-name" v-if="file">
+                        {{ file.name }}
+                    </span>
+                </b-upload>
+            </b-field>
+        </div>
+        <div class="button-upload is-flex is-justify-content-center">
+            <b-field>
+                <b-button @click="clearBrowseImage">Cancel</b-button>
+            </b-field>
+            <b-field>
+                <b-button v-if="file" type="is-success" @click="uploadImage()">Upload</b-button>
+                <b-button v-else type="is-success" disabled >Upload</b-button>
+            </b-field>
+
+        </div>    
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>

@@ -1,4 +1,4 @@
-const host = 'https://bifrost-boss.ask-dom.com'
+const host = 'https://1be921cbcf68.ngrok.io'
 const bucketName = 'new-bucket-from-rest'
 var app = new Vue({
     el: '#app',

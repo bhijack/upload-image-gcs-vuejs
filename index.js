@@ -139,6 +139,7 @@ var app = new Vue({
             })
             this.isLoading = false
             this.isUploadImageError = false
+            this.imageMessage = null
         },
         async createBucket(){
             this.isLoading = true

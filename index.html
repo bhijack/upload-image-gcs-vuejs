@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
     <style>
         [v-cloak] {
-            display:none
+            display: none
         }
 
         #app {
@@ -39,17 +39,26 @@
             margin-top: 2rem;
             margin-bottom: 2rem;
         }
-        .image-list{
+
+        .image-list,
+        #bucket-info {
             margin-top: 2rem;
         }
+
         .button-download {
             color: #fff
         }
+
         .button-download:hover {
             color: #fff;
         }
-        h1 { 
+
+        h1 {
             border-bottom: 5px solid #ccc;
+        }
+
+        .error-message {
+            color: red;
         }
     </style>
 </head>
@@ -57,69 +66,95 @@
 <body>
     <div class="container" id="app" v-cloak>
         <h1 class="is-size-3">Upload image</h1>
+        <div id="bucket-info">
+            <b-field label="Create Bucket">
+                <b-input v-model="createdBucketName" placeholder="Enter bucket name"></b-input>
+                <b-button @click="createBucket" v-if="createdBucketName">Create</b-button>
+                <b-button disabled v-else>Create</b-button>
+            </b-field>
+            <p class="is-size-6" v-if="createBucketError">{{createBucketError}} <a target="_blank"
+                    href="https://cloud.google.com/storage/docs/naming-buckets">more info.</a></p>
+            <b-field label="Buckets" v-if="buckets.length > 0">
+                <b-select placeholder="Select a bucket" v-model="bucketName" @change.native="changeBucket()">
+                    <option v-for="bucket in buckets" :value="bucket" :key="bucket">
+                        {{ bucket }}
+                    </option>
+                </b-select>
+            </b-field>
+            <b-button class="is-info" @click="addBucketCors(bucketName)" v-if="isUploadImageError">
+                Add CORS
+            </b-button>
+        </div>
 
-        <div class="image-message is-flex is-justify-content-center" >
+        <div class="image-message is-flex is-justify-content-center">
             <p v-if="isImageUploaded">Image uploaded.</p>
             <p v-if="isImageLarge">Image too large. (Limit size: 3MB)</p>
-            <p v-if="isUploadImageError">Upload image error</p>
+            <p v-if="isUploadImageError">Upload image error. Try to add CORS to bucket</p>
         </div>
 
-        <div id="preview-image" v-if="preview" class="is-flex is-justify-content-center">
-            <b-loading v-model="isLoading"></b-loading>
-            <img :src="preview" alt="">
-        </div>
+        <b-loading v-model="isLoading"></b-loading>
 
-
-        <div class="is-flex is-justify-content-center">
-            <b-field class="file is-primary" :class="{'has-name': !!file}">
-                <b-upload v-model="file" class="file-label" @input="previewUpload()" accept="image/*">
-                    <span class="file-cta">
-                        <b-icon class="file-icon" icon="upload"></b-icon>
-                        <span class="file-label">Browse image</span>
-                    </span>
-                    <span class="file-name" v-if="file">
-                        {{ file.name }}
-                    </span>
-                </b-upload>
-            </b-field>
-        </div>
-        <div class="button-upload is-flex is-justify-content-center">
-            <b-field>
-                <b-button @click="clearBrowseImage">Cancel</b-button>
-            </b-field>
-            <b-field>
-                <b-button v-if="file" type="is-success" @click="uploadImage()">Upload</b-button>
-                <b-button v-else type="is-success" disabled>Upload</b-button>
-            </b-field>
-
-        </div>
-
-        <div class="image-list">
-            <div class="is-flex is-justify-content-flex-end" id="expired-time-url">
-                <p>Refresh in : {{expiredTimeUrl}} s.</p>
+        <span v-if="buckets.length > 0 && bucketName">
+            <div id="preview-image" v-if="preview" class="is-flex is-justify-content-center">
+                <img :src="preview" alt="">
             </div>
-            <b-table :data="images">
-                <b-table-column field="name" label="Name" v-slot="props">
-                    {{ props.row.name }}
-                </b-table-column>
-                <b-table-column field="size" label="Size (KB)" v-slot="props">
-                    {{ props.row.size }}
-                </b-table-column>
-                <b-table-column field="updated" label="Updated" v-slot="props">
-                    {{ props.row.updated }}
-                </b-table-column>
-                <b-table-column field="url" label="Download" v-slot="props">
-                    <b-button type="is-link">
-                        <a  class="button-download" :href="props.row.url" target="_blank" download>Download</a>
-                    </b-button>
-                </b-table-column>
 
-            </b-table>
 
-            <div v-if="images.length == 0">
-                No images.
+            <div class="is-flex is-justify-content-center">
+                <b-field class="file is-primary" :class="{'has-name': !!file}">
+                    <b-upload v-model="file" class="file-label" @input="previewUpload()" accept="image/*">
+                        <span class="file-cta">
+                            <b-icon class="file-icon" icon="upload"></b-icon>
+                            <span class="file-label">Browse image</span>
+                        </span>
+                        <span class="file-name" v-if="file">
+                            {{ file.name }}
+                        </span>
+                    </b-upload>
+                </b-field>
             </div>
-        </div>
+            <div class="button-upload is-flex is-justify-content-center">
+                <b-field>
+                    <b-button @click="clearBrowseImage">Cancel</b-button>
+                </b-field>
+                <b-field>
+                    <b-button v-if="file" type="is-success" @click="uploadImage()">Upload</b-button>
+                    <b-button v-else type="is-success" disabled>Upload</b-button>
+                </b-field>
+
+            </div>
+            <div class="image-list">
+                <div class="is-flex is-justify-content-flex-end" id="expired-time-url">
+                    <p>Refresh in : {{expiredTimeUrl}} s.</p>
+                </div>
+                <b-table :data="images">
+                    <b-table-column field="name" label="Name" v-slot="props">
+                        {{ props.row.name }}
+                    </b-table-column>
+                    <b-table-column field="size" label="Size (KB)" v-slot="props">
+                        {{ props.row.size }}
+                    </b-table-column>
+                    <b-table-column field="updated" label="Updated" v-slot="props">
+                        {{ props.row.updated }}
+                    </b-table-column>
+                    <b-table-column field="url" label="Download" v-slot="props">
+                        <a class="button-download" :href="props.row.url" target="_blank" download>
+                            <b-button type="is-link">Download</b-button>
+                        </a>
+                    </b-table-column>
+
+                </b-table>
+
+                <div v-if="images.length == 0">
+                    No images.
+                </div>
+            </div>
+
+        </span>
+
+
+
+
 
     </div>
 

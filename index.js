@@ -1,5 +1,4 @@
-const host = 'https://1be921cbcf68.ngrok.io'
-const bucketName = 'new-bucket-from-rest'
+const host = "http://localhost:3000"
 var app = new Vue({
     el: '#app',
     data: {
@@ -12,20 +11,26 @@ var app = new Vue({
         isLoading: false,
         images: [],
         expiredTimeUrl: 60,//second
+        bucketName: '',
+        buckets: [],
+        timer: null,
+        createdBucketName: null,
+        createBucketError: null,
     },
     async mounted() {
+        await this.getBuckets()
+        this.bucketName = this.buckets[0]
         this.getImages()
     },
     methods: {
         countDowntime() {
             if (this.expiredTimeUrl > 0) {
-                setTimeout(() => {
+                this.timer = setTimeout(() => {
                     this.expiredTimeUrl -= 1
                     this.countDowntime()
                 }, 1000)
-            }else{
+            } else {
                 // refresh url
-                this.expiredTimeUrl = 60
                 this.getImages()
             }
         },
@@ -52,12 +57,12 @@ var app = new Vue({
         async uploadImage() {
             this.isLoading = true
             if (this.file) {
-                let uploadSignedURL = await axios.post(`${host}/bucket/${bucketName}/signed-url/upload`, {
+                let uploadSignedURL = await axios.post(`${host}/bucket/${this.bucketName}/signed-url/upload`, {
                     fileName: this.file.name,
                     fileType: this.file.type,
-                    bucketName: bucketName
+                    bucketName: this.bucketName
                 }).catch(error => {
-                    console.log(error)
+                    console.log(error.response)
                     this.isUploadImageError = true
                     this.file = null
                     this.preview = null
@@ -71,7 +76,7 @@ var app = new Vue({
                             "Content-Type": this.file.type
                         }
                     }).catch(error => {
-                        console.log(error)
+                        console.log(error.response)
                         this.isUploadImageError = true
                         this.file = null
                         this.preview = null
@@ -89,9 +94,10 @@ var app = new Vue({
             this.isLoading = false
         },
         async getImages() {
+            this.expiredTimeUrl = 60
             this.images = []
-            let imagesList = await axios.get(`${host}/bucket/${bucketName}/images`).catch(error => {
-                console.log(error)
+            let imagesList = await axios.get(`${host}/bucket/${this.bucketName}/images`).catch(error => {
+                console.log(error.response)
             })
             if (imagesList && 'data' in imagesList.data) {
                 for (let i = 0; i < imagesList.data.data.length; i++) {
@@ -105,7 +111,53 @@ var app = new Vue({
                     })
                 }
             }
+            if(this.timer != null){
+                clearTimeout(this.timer)
+            }
             this.countDowntime()
+        },
+        async getBuckets() {
+            let bucketsList = await axios.get(`${host}/bucket`).catch(error => {
+                console.log(error.response)
+            })
+            this.buckets = bucketsList.data.data
+        },
+        changeBucket() {
+            this.isImageLarge = false
+            this.isImageUploaded = false
+            this.isUploadImageError = false
+            this.getImages()
+        },
+        async addBucketCors(bucketName){
+            this.isLoading = true
+            await axios.post(`${host}/bucket/${bucketName}/cors`,{
+                origin: window.location.origin
+            }).catch(error => {
+                console.log(error.response)
+            })
+            this.isLoading = false
+            this.isUploadImageError = false
+        },
+        async createBucket(){
+            this.isLoading = true
+            let response = await axios.post(`${host}/bucket`,{
+                bucketName: this.createdBucketName
+            }).catch(error => {
+                console.log(error.response)
+                this.createBucketError = error.response.data.message.message
+            })
+            if (response){
+                this.createBucketError = null
+                this.addBucketCors(this.createdBucketName)
+                await this.getBuckets()
+                this.bucketName = this.createdBucketName
+                this.getImages()
+            }
+            this.isImageLarge = false
+            this.isImageUploaded = false
+            this.isUploadImageError = false
+            this.isLoading = false
+            this.createdBucketName = null
         }
     }
 

@@ -5,8 +5,8 @@ var app = new Vue({
         file: null,
         // dropFiles: [],
         preview: null,
-        isImageLarge: false,
-        isImageUploaded: false,
+        // isImageLarge: false,
+        // isImageUploaded: false,
         isUploadImageError: false,
         isLoading: false,
         images: [],
@@ -16,6 +16,7 @@ var app = new Vue({
         timer: null,
         createdBucketName: null,
         createBucketError: null,
+        imageMessage: null,
     },
     async mounted() {
         await this.getBuckets()
@@ -35,11 +36,10 @@ var app = new Vue({
             }
         },
         previewUpload() {
-            this.isImageLarge = false
-            this.isImageUploaded = false
             this.isUploadImageError = false
+            this.imageMessage = null
             this.isImageSizeExceeded()
-            if (!this.isImageLarge) {
+            if (!this.imageMessage) {
                 this.preview = URL.createObjectURL(this.file)
             } else {
                 this.preview = null
@@ -48,7 +48,7 @@ var app = new Vue({
         },
         isImageSizeExceeded() {
             var filesize = ((this.file.size / 1000) / 1000); //MB - use 1000 instead 1024
-            this.isImageLarge = filesize > 3
+            this.imageMessage = filesize > 3 ? 'Image too large. (Limit size: 3MB)' : null
         },
         clearBrowseImage() {
             this.file = null
@@ -63,7 +63,7 @@ var app = new Vue({
                     bucketName: this.bucketName
                 }).catch(error => {
                     console.log(error.response)
-                    this.isUploadImageError = true
+                    this.imageMessage = 'Cannot get signed URL'
                     this.file = null
                     this.preview = null
                 })
@@ -77,13 +77,14 @@ var app = new Vue({
                         }
                     }).catch(error => {
                         console.log(error.response)
+                        this.imageMessage = 'Upload image error. Try to add CORS to bucket.'
                         this.isUploadImageError = true
                         this.file = null
                         this.preview = null
                         return false
                     })
                     if (response) {
-                        this.isImageUploaded = true
+                        this.imageMessage = 'Image uploaded.'
                         this.file = null
                         this.preview = null
                         this.getImages()
@@ -123,10 +124,11 @@ var app = new Vue({
             this.buckets = bucketsList.data.data
         },
         changeBucket() {
-            this.isImageLarge = false
-            this.isImageUploaded = false
+            this.isLoading = true
+            this.imageMessage = null
             this.isUploadImageError = false
             this.getImages()
+            this.isLoading = false
         },
         async addBucketCors(bucketName){
             this.isLoading = true
@@ -153,8 +155,7 @@ var app = new Vue({
                 this.bucketName = this.createdBucketName
                 this.getImages()
             }
-            this.isImageLarge = false
-            this.isImageUploaded = false
+            this.imageMessage = null
             this.isUploadImageError = false
             this.isLoading = false
             this.createdBucketName = null

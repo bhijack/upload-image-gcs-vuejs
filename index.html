@@ -86,10 +86,11 @@
             </b-button>
         </div>
 
-        <div class="image-message is-flex is-justify-content-center">
-            <p v-if="isImageUploaded">Image uploaded.</p>
+        <div v-if="imageMessage" class="image-message is-flex is-justify-content-center">
+            <!-- <p v-if="isImageUploaded">Image uploaded.</p>
             <p v-if="isImageLarge">Image too large. (Limit size: 3MB)</p>
-            <p v-if="isUploadImageError">Upload image error. Try to add CORS to bucket</p>
+            <p v-if="isUploadImageError">Upload image error. Try to add CORS to bucket</p> -->
+            <p>{{imageMessage}}</p>
         </div>
 
         <b-loading v-model="isLoading"></b-loading>

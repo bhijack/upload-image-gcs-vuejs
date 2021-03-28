@@ -36,7 +36,20 @@
         }
 
         .image-message {
+            margin-top: 2rem;
             margin-bottom: 2rem;
+        }
+        .image-list{
+            margin-top: 2rem;
+        }
+        .button-download {
+            color: #fff
+        }
+        .button-download:hover {
+            color: #fff;
+        }
+        h1 { 
+            border-bottom: 5px solid #ccc;
         }
     </style>
 </head>
@@ -79,6 +92,33 @@
                 <b-button v-else type="is-success" disabled>Upload</b-button>
             </b-field>
 
+        </div>
+
+        <div class="image-list">
+            <div class="is-flex is-justify-content-flex-end" id="expired-time-url">
+                <p>Refresh in : {{expiredTimeUrl}} s.</p>
+            </div>
+            <b-table :data="images">
+                <b-table-column field="name" label="Name" v-slot="props">
+                    {{ props.row.name }}
+                </b-table-column>
+                <b-table-column field="size" label="Size (KB)" v-slot="props">
+                    {{ props.row.size }}
+                </b-table-column>
+                <b-table-column field="updated" label="Updated" v-slot="props">
+                    {{ props.row.updated }}
+                </b-table-column>
+                <b-table-column field="url" label="Download" v-slot="props">
+                    <b-button type="is-link">
+                        <a  class="button-download" :href="props.row.url" target="_blank" download>Download</a>
+                    </b-button>
+                </b-table-column>
+
+            </b-table>
+
+            <div v-if="images.length == 0">
+                No images.
+            </div>
         </div>
 
     </div>
